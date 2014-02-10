@@ -1,0 +1,16 @@
+@charset "utf-8";
+
+html {
+    color: #BCBCBC;
+}
+
+body {
+    margin: 100px auto auto;
+    width: 800px;
+}
+
+.elementcontainer {width: 25%; float: left; text-align: center;}
+.indicator {height: 50px; width: 50px; margin-top: 20px; margin-left: auto; margin-right: auto;}
+.today {border: solid gray; -moz-box-sizing: border-box;}
+.completed {background-color: green;}
+.notcompleted {background-color: red;}
