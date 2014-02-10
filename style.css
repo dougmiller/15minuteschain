@@ -9,8 +9,8 @@ body {
     width: 800px;
 }
 
-.elementcontainer {width: 25%; float: left; text-align: center;}
-.indicator {height: 50px; width: 50px; margin-top: 20px; margin-left: auto; margin-right: auto;}
+.chainContainer {width: 25%; float: left; text-align: center;}
+.chainLink {height: 50px; width: 50px; margin-top: 20px; margin-left: auto; margin-right: auto;}
 .today {border: solid gray; -moz-box-sizing: border-box;}
-.completed {background-color: green;}
-.notcompleted {background-color: red;}
+.done {background-color: green;}
+.notdone {background-color: red;}

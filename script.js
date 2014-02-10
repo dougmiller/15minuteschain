@@ -1,76 +1,66 @@
-/*jshint moz:true */
 (function () {
     "use strict";
-
     let c = console.log;
 
-    let job1 = document.getElementById("job1"),
-        job2 = document.getElementById("job2"),
-        job3 = document.getElementById("job3"),
-        job4 = document.getElementById("job4");
+    let jobs = document.getElementsByClassName("chainContainer");
 
-    let job1history = localStorage.getItem(job1.children[0].textContent);
-    let job2history = localStorage.getItem(job2.children[0].textContent);
-    let job3history = localStorage.getItem(job3.children[0].textContent);
-    let job4history = localStorage.getItem(job4.children[0].textContent);
-
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let lastModDate = localStorage.getItem("lastModDate");
-
-    if (lastModDate === null) {
-        localStorage.setItem("lastModDate", today);
-        lastModDate = today;
+    //  The chainContainer is setup to have an <h1> as the first element ([0]).
+    //  This element's text act's as the local storage key.
+    //  I.E. Changing the text will lose your history.
+    //  You can have as many of them as you want (fit on a page). Just copy a different one and change the text etc.
+    //  Chain links start at [1] and go for as many as you want. 1 per day though. Unless you want to change that.
+    let jobHistories = [];
+    for (let i = 0; i < jobs.length; i += 1) {
+        jobHistories[i] = localStorage.getItem(jobs[i].children[0].textContent);
     }
 
-    if (job1history === null) {
-        localStorage.setItem(job1.children[0].textContent, "false,false,false,false,false,false,false");
-        job1history = localStorage.getItem(job1.children[0].textContent);
+    //  Click on 'today'
+    for (let i = 0; i < jobs.length; i += 1) {
+        jobs[i].children[1].addEventListener("click", function () {
+            this.classList.add("done");
+            // Serialise state to local storage
+            let state = [];
+            for (let i = 1; i < this.parentNode.children.length; i += 1) {
+                if (this.parentNode.children[i].classList.contains("done")) {
+                    state.push("true");
+                } else {
+                    state.push("false");
+                }
+            }
+            localStorage.setItem(this.parentNode.children[0].textContent, state);
+        });
     }
 
-    if (lastModDate !== today) {
-        localStorage.setItem("lastModDate", today);
-        let datediff = today - lastModDate;
-        for (let i = 0; i < datediff; i += 1) {
-            let localhistory = job1history.split(',');
-            localhistory.splice(6, 1);
-            localhistory.push('false');
-        }
-    }
+    //  Restore from state
+    for (let i = 0; i < jobs.length; i += 1) {
+        let prevState;
+        try {
+            prevState = localStorage.getItem(jobs[i].children[0].textContent).split(",");
 
-
-    let localchistory = job1history.split(','); // localhistory stores strings, not objects, so arrays are converted to csv
-    let children = job1.children;
-    for (let i = 0; i < localchistory.length; i += 1) {
-        if (localchistory[i] === 'true') {
-            children[i + 1].classList.add("completed");
-            children[i + 1].classList.remove("notcompleted");
-        }
-    }
-
-
-    job1.children[1].addEventListener("click", function () {
-        let children = job1.children, progress = [];
-        children[1].classList.add("completed");
-
-        for (let i = 1; i < children.length; i++) {
-            if (children[i].classList.contains("notcompleted")) {
-                progress.push("false");
-            } else {
-                progress.push("true");
+            for (let j = 0; j < prevState.length; j += 1) {
+                if (prevState[j] === "true") {  // Using truthiness not actual boolean logic.
+                    jobs[i].children[j + 1].classList.add("done");
+                } else {
+                    jobs[i].children[j + 1].classList.add("notdone");
+                }
+            }
+        } catch (TypeError) { //  No history yet
+            c(jobs[i]);
+            for (let j = 2; j < jobs[i].children.length; j += 1) {
+                jobs[i].children[j].classList.add("notdone");
             }
         }
-        localStorage.setItem(job1.children[0].textContent, progress);
-        c(progress);
-    });
+    }
 
-    job2.children[1].addEventListener("click", function () {
-        c(localStorage.getItem(job1history));
-        c(localStorage.getItem(job1.children[0].textContent));
-    });
-
-    job3.children[1].addEventListener("click", function () {
-        delete window.localStorage[job1.children[0].textContent];
+    //  Reset the history
+    let reset = document.getElementById("reset");
+    reset.addEventListener("click", function () {
+        for (let i = 0; i < jobs.length; i += 1) {
+            localStorage.clear(jobs[i].children[0].textContent);
+            for (let j = 0; j < jobs[i].children.length; j += 1) {
+                jobs[i].children[j].classList.remove("done");
+                jobs[i].children[j].classList.remove("notdone");
+            }
+        }
     });
 }());
