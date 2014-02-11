@@ -1,8 +1,14 @@
 (function () {
     "use strict";
-    let c = console.log;
+
+    function compareDates(date1, date2) {
+        return (date1 - date2) / 86400000;
+    }
 
     let jobs = document.getElementsByClassName("chainContainer");
+    let todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    todayDate.setDate(todayDate.getDate());
 
     //  The chainContainer is setup to have an <h1> as the first element ([0]).
     //  This element's text act's as the local storage key.
@@ -17,17 +23,20 @@
     //  Click on 'today'
     for (let i = 0; i < jobs.length; i += 1) {
         jobs[i].children[1].addEventListener("click", function () {
-            this.classList.add("done");
             // Serialise state to local storage
-            let state = [];
-            for (let i = 1; i < this.parentNode.children.length; i += 1) {
-                if (this.parentNode.children[i].classList.contains("done")) {
-                    state.push("true");
-                } else {
-                    state.push("false");
-                }
+            let state = localStorage.getItem(this.parentNode.children[0].textContent);
+            this.classList.add("done");
+
+            if (state === null) {  //  Nothing in local history yet
+                state = [];
+            } else {
+                state = state.split(",");
             }
-            localStorage.setItem(this.parentNode.children[0].textContent, state);
+
+            if (state.indexOf(todayDate.toDateString()) === -1) {
+                state.push(todayDate.toDateString());
+                localStorage.setItem(this.parentNode.children[0].textContent, state);
+            }
         });
     }
 
@@ -38,14 +47,22 @@
             prevState = localStorage.getItem(jobs[i].children[0].textContent).split(",");
 
             for (let j = 0; j < prevState.length; j += 1) {
-                if (prevState[j] === "true") {  // Using truthiness not actual boolean logic.
-                    jobs[i].children[j + 1].classList.add("done");
-                } else {
-                    jobs[i].children[j + 1].classList.add("notdone");
+                let stateDate = new Date(prevState[j]);
+                let dateDiff = compareDates(todayDate, stateDate);
+
+                if (dateDiff > jobs[i].children.length - 2) {
+                    break;  // Array out of bounds
+                }
+
+                jobs[i].children[dateDiff + 1].classList.add("done");
+            }
+
+            for (let j = 2; j < jobs[i].children.length; j += 1) {
+                if (!jobs[i].children[j].classList.contains("done")) {
+                    jobs[i].children[j].classList.add("notdone");
                 }
             }
         } catch (TypeError) { //  No history yet
-            c(jobs[i]);
             for (let j = 2; j < jobs[i].children.length; j += 1) {
                 jobs[i].children[j].classList.add("notdone");
             }
@@ -57,9 +74,12 @@
     reset.addEventListener("click", function () {
         for (let i = 0; i < jobs.length; i += 1) {
             localStorage.clear(jobs[i].children[0].textContent);
-            for (let j = 0; j < jobs[i].children.length; j += 1) {
+            for (let j = 1; j < jobs[i].children.length; j += 1) {
                 jobs[i].children[j].classList.remove("done");
                 jobs[i].children[j].classList.remove("notdone");
+            }
+            for (let j = 2; j < jobs[i].children.length; j += 1) {
+                jobs[i].children[j].classList.add("notdone");
             }
         }
     });
