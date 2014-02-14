@@ -18,7 +18,12 @@
     let jobHistories = [];
     for (let i = 0; i < jobs.length; i += 1) {
         jobHistories[i] = localStorage.getItem(jobs[i].children[0].textContent);
+        
+        for (let j = 1; j < jobs[i].children.length; j += 1) {
+            jobs[i].children[j].classList.add("chainLink");
+        }
     }
+
 
     //  Click on 'today'
     for (let i = 0; i < jobs.length; i += 1) {
@@ -45,7 +50,6 @@
         let prevState;
         try {
             prevState = localStorage.getItem(jobs[i].children[0].textContent).split(",");
-
             for (let j = 0; j < prevState.length; j += 1) {
                 let stateDate = new Date(prevState[j]);
                 let dateDiff = compareDates(todayDate, stateDate);
